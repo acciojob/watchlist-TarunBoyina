@@ -1,4 +1,5 @@
 package com.driver;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,14 +58,14 @@ public class MovieController {
     @GetMapping("/get-movies-by-director-name")                                               // 6th API - Done
     public ResponseEntity<List<String>> getMoviesByDirectorName(@PathVariable String directorName){
 
-        List<String> list = movieService.getMovieByDirectorName(directorName);
+        List<String> list = movieService.getMoviesByDirectorName(directorName);
         return new ResponseEntity<>(list,HttpStatus.CREATED);
     }
 
     @GetMapping("/get-all-movies")                                                           // 7th API - Done
     public ResponseEntity<List<String>> findAllMovies(){
 
-        List<String> list = movieService.getAllMovie();
+        List<String> list = movieService.getAllMovies();
         return new ResponseEntity<>(list,HttpStatus.CREATED);
     }
 
