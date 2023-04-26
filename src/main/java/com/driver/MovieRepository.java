@@ -1,99 +1,113 @@
-package com.driver;
+package com.driver.repository;
 
-import org.springframework.stereotype.Repository;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.driver.models.Director;
+import com.driver.models.Movie;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;import java.util.ArrayList;import java.util.HashMap;import java.util.List;
 
 @Repository
-public class MovieRepository {
+public class MovieRepository
+{
+    HashMap<String,Movie> movieDb=new HashMap<>();
 
-    HashMap<String,Movie> movieDb = new HashMap<>();
-    HashMap<String,Director> directorDb = new HashMap<>();
-    HashMap<String,List<String>> movieDirectorPair = new HashMap<>();     // key - Director , value : list of movies
+    HashMap<String, Director> directorDb = new HashMap<>();
 
-    public String addMovie(Movie movie){
+    HashMap<String,List<String>> directorMovieDb = new HashMap<>();
 
-        String key = movie.getName();
+
+    public  ResponseEntity<String> addMovie(Movie movie)
+    {
+        String key=movie.getName();
+
         movieDb.put(key,movie);
-        return "Movie added Successfully";
+
+        return new ResponseEntity<>("Success",HttpStatus.OK);
     }
 
-    public String addDirector(Director director){
-
-        String key = director.getName();
+    public ResponseEntity<String> addDirector(Director director)
+    {
+        String key=director.getName();
         directorDb.put(key,director);
-        return "Director added Successfully";
+
+        return new ResponseEntity<>("Success",HttpStatus.OK);
     }
 
-    public String addMovieDirectorPair(String movieName,String directorName){
+    public ResponseEntity<String> addMovieDirectorPair(String  movie,String director)
+    {
+        if (directorMovieDb.containsKey(director))
+        {
+            List<String> movies=directorMovieDb.get(director);
+            movies.add(movie);
+            directorMovieDb.put(director,movies);
 
-        List<String> list = movieDirectorPair.get(directorName);
-
-        if(list == null){
-            list = new ArrayList<>();
         }
-
-        list.add(movieName);
-        movieDirectorPair.put(directorName,list);
-
-        return "Movie with Director added Successfully";
+        else
+        {
+            List<String> movies=new ArrayList<>();
+            movies.add(movie);
+            directorMovieDb.put(director,movies);
+        }
+        return new ResponseEntity<>("Success",HttpStatus.OK);
     }
 
-    public Movie getMovieByName(String MovieName){
+    public Movie getMovieByName(String movieName)
+    {
 
-        return movieDb.get(MovieName);
+
+        return movieDb.get(movieName);
     }
+    public Director getDirectorByName(String directorName)
+    {
 
-    public Director getDirectorByName(String directorName){
 
         return directorDb.get(directorName);
     }
 
-    public List<String> getMoviesByDirectorName(String directorName){
+    public List<String> getMoviesByDirectorName(String directorName)
+    {
 
-        return movieDirectorPair.get(directorName);
+
+        return directorMovieDb.get(directorName);
     }
 
-    public List<String> getAllMovies(){
-
-        List<String> list = new ArrayList<>();
-
-        for(String st : movieDb.keySet()){
-            list.add(st);
-        }
-        return list;
-    }
-
-    public String deleteDirectorByName(String directorName){
-
-        //   1. directorDb
-        //   2. also need to remove the entries in movie_director hashmap
-        //   3. Corresponding movies also
-
-        for(String st : movieDirectorPair.get(directorName)){
-            movieDb.remove(st);
-        }
-        movieDirectorPair.remove(directorName);
-        directorDb.remove(directorName);
-
-        return "Director removed Successfully";
-    }
-
-    public String removeAllDirector(){
-
-        for(String director : directorDb.keySet())
+    public List<String>findAllMovies()
+    {
+        List<String> result=new ArrayList<>();
+        for (Movie movie:movieDb.values())
         {
-
-            for(String st : movieDirectorPair.get(director)){
-                movieDb.remove(st);
-            }
-            movieDirectorPair.remove(director);
-            directorDb.remove(director);
+            result.add(movie.getName());
         }
 
-        return "All Director removed Successfully";
+        return result;
     }
+
+    public void  deleteDirectorByName(String directorName)
+    {
+        List<String> movies=getMoviesByDirectorName(directorName);
+        for(String name:movies)
+        {
+            movieDb.remove(name);
+        }
+        directorMovieDb.remove(directorName);
+        directorDb.remove(directorName);
+    }
+
+    public void deleteAllDirectors()
+    {
+        List<String> directors=new ArrayList<>();
+
+        for (Director director:directorDb.values())
+        {
+            directors.add(director.getName());
+        }
+
+        for(String directorName:directors)
+        {
+            deleteDirectorByName(directorName);
+
+        }
+    }
+
+
 }
